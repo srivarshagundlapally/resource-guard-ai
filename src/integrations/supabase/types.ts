@@ -14,7 +14,482 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      anomalies: {
+        Row: {
+          anomaly_type: string
+          building_id: string
+          created_at: string | null
+          description: string | null
+          floor_no: number
+          id: string
+          is_resolved: boolean | null
+          resolved_at: string | null
+          resource_type: string
+          room_no: number
+          score: number | null
+          severity: string
+          timestamp: string
+        }
+        Insert: {
+          anomaly_type: string
+          building_id: string
+          created_at?: string | null
+          description?: string | null
+          floor_no: number
+          id?: string
+          is_resolved?: boolean | null
+          resolved_at?: string | null
+          resource_type: string
+          room_no: number
+          score?: number | null
+          severity: string
+          timestamp: string
+        }
+        Update: {
+          anomaly_type?: string
+          building_id?: string
+          created_at?: string | null
+          description?: string | null
+          floor_no?: number
+          id?: string
+          is_resolved?: boolean | null
+          resolved_at?: string | null
+          resource_type?: string
+          room_no?: number
+          score?: number | null
+          severity?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      buildings: {
+        Row: {
+          address: string | null
+          building_id: string
+          created_at: string | null
+          id: number
+          name: string | null
+          total_floors: number | null
+        }
+        Insert: {
+          address?: string | null
+          building_id: string
+          created_at?: string | null
+          id?: number
+          name?: string | null
+          total_floors?: number | null
+        }
+        Update: {
+          address?: string | null
+          building_id?: string
+          created_at?: string | null
+          id?: number
+          name?: string | null
+          total_floors?: number | null
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          role: string
+          session_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          role: string
+          session_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      electricity_consumption: {
+        Row: {
+          anomaly_label: string | null
+          building_id: string
+          created_at: string | null
+          electricity_usage_kwh: number
+          floor_no: number
+          id: number
+          room_no: number
+          timestamp: string
+        }
+        Insert: {
+          anomaly_label?: string | null
+          building_id: string
+          created_at?: string | null
+          electricity_usage_kwh: number
+          floor_no: number
+          id?: number
+          room_no: number
+          timestamp: string
+        }
+        Update: {
+          anomaly_label?: string | null
+          building_id?: string
+          created_at?: string | null
+          electricity_usage_kwh?: number
+          floor_no?: number
+          id?: number
+          room_no?: number
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      internet_consumption: {
+        Row: {
+          anomaly_label: string | null
+          building_id: string
+          created_at: string | null
+          floor_no: number
+          id: number
+          internet_usage_gb: number
+          room_no: number
+          timestamp: string
+        }
+        Insert: {
+          anomaly_label?: string | null
+          building_id: string
+          created_at?: string | null
+          floor_no: number
+          id?: number
+          internet_usage_gb: number
+          room_no: number
+          timestamp: string
+        }
+        Update: {
+          anomaly_label?: string | null
+          building_id?: string
+          created_at?: string | null
+          floor_no?: number
+          id?: number
+          internet_usage_gb?: number
+          room_no?: number
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      model_registry: {
+        Row: {
+          artifact_path: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          mae: number | null
+          model_name: string
+          r2_score: number | null
+          resource_type: string
+          rmse: number | null
+          task: string
+          trained_at: string | null
+          version: string | null
+        }
+        Insert: {
+          artifact_path?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          mae?: number | null
+          model_name: string
+          r2_score?: number | null
+          resource_type: string
+          rmse?: number | null
+          task: string
+          trained_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          artifact_path?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          mae?: number | null
+          model_name?: string
+          r2_score?: number | null
+          resource_type?: string
+          rmse?: number | null
+          task?: string
+          trained_at?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      predictions: {
+        Row: {
+          actual_value: number | null
+          building_id: string
+          created_at: string | null
+          floor_no: number | null
+          id: string
+          mae: number | null
+          model_name: string | null
+          predicted_value: number
+          r2_score: number | null
+          resource_type: string
+          rmse: number | null
+          room_no: number | null
+          timestamp: string
+        }
+        Insert: {
+          actual_value?: number | null
+          building_id: string
+          created_at?: string | null
+          floor_no?: number | null
+          id?: string
+          mae?: number | null
+          model_name?: string | null
+          predicted_value: number
+          r2_score?: number | null
+          resource_type: string
+          rmse?: number | null
+          room_no?: number | null
+          timestamp: string
+        }
+        Update: {
+          actual_value?: number | null
+          building_id?: string
+          created_at?: string | null
+          floor_no?: number | null
+          id?: string
+          mae?: number | null
+          model_name?: string | null
+          predicted_value?: number
+          r2_score?: number | null
+          resource_type?: string
+          rmse?: number | null
+          room_no?: number | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      recommendations: {
+        Row: {
+          action: string
+          anomaly_id: string | null
+          building_id: string
+          created_at: string | null
+          estimated_saving: number | null
+          floor_no: number | null
+          id: string
+          priority: number
+          resource_type: string
+          room_no: number | null
+          saving_unit: string | null
+          severity: string
+          status: string | null
+        }
+        Insert: {
+          action: string
+          anomaly_id?: string | null
+          building_id: string
+          created_at?: string | null
+          estimated_saving?: number | null
+          floor_no?: number | null
+          id?: string
+          priority: number
+          resource_type: string
+          room_no?: number | null
+          saving_unit?: string | null
+          severity: string
+          status?: string | null
+        }
+        Update: {
+          action?: string
+          anomaly_id?: string | null
+          building_id?: string
+          created_at?: string | null
+          estimated_saving?: number | null
+          floor_no?: number | null
+          id?: string
+          priority?: number
+          resource_type?: string
+          room_no?: number | null
+          saving_unit?: string | null
+          severity?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendations_anomaly_id_fkey"
+            columns: ["anomaly_id"]
+            isOneToOne: false
+            referencedRelation: "anomalies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          content: Json
+          created_at: string | null
+          id: string
+          period_end: string
+          period_start: string
+          report_type: string
+          resource_type: string | null
+          vector_id: string | null
+        }
+        Insert: {
+          content: Json
+          created_at?: string | null
+          id?: string
+          period_end: string
+          period_start: string
+          report_type: string
+          resource_type?: string | null
+          vector_id?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          report_type?: string
+          resource_type?: string | null
+          vector_id?: string | null
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          building_id: string | null
+          capacity: number | null
+          floor_no: number
+          id: number
+          room_no: number
+          room_type: string | null
+        }
+        Insert: {
+          building_id?: string | null
+          capacity?: number | null
+          floor_no: number
+          id?: number
+          room_no: number
+          room_type?: string | null
+        }
+        Update: {
+          building_id?: string | null
+          capacity?: number | null
+          floor_no?: number
+          id?: number
+          room_no?: number
+          room_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["building_id"]
+          },
+        ]
+      }
+      root_cause_analysis: {
+        Row: {
+          anomaly_id: string | null
+          cause: string
+          confidence_score: number
+          created_at: string | null
+          description: string | null
+          id: string
+        }
+        Insert: {
+          anomaly_id?: string | null
+          cause: string
+          confidence_score: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+        }
+        Update: {
+          anomaly_id?: string | null
+          cause?: string
+          confidence_score?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "root_cause_analysis_anomaly_id_fkey"
+            columns: ["anomaly_id"]
+            isOneToOne: false
+            referencedRelation: "anomalies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      water_consumption: {
+        Row: {
+          anomaly_label: string | null
+          building_id: string
+          created_at: string | null
+          floor_no: number
+          id: number
+          room_no: number
+          timestamp: string
+          water_usage_liters: number
+        }
+        Insert: {
+          anomaly_label?: string | null
+          building_id: string
+          created_at?: string | null
+          floor_no: number
+          id?: number
+          room_no: number
+          timestamp: string
+          water_usage_liters: number
+        }
+        Update: {
+          anomaly_label?: string | null
+          building_id?: string
+          created_at?: string | null
+          floor_no?: number
+          id?: number
+          room_no?: number
+          timestamp?: string
+          water_usage_liters?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
