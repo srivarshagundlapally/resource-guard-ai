@@ -29,7 +29,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { AlertBadge } from "@/components/ui/AlertBadge";
-import { ResourceIcon, type ResourceKind } from "@/components/ui/ResourceIcon";
 import { Button } from "@/components/ui/button";
 import {
   Select,
