@@ -37,11 +37,10 @@ function UploadPage() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle
-        icon={Upload}
-        title="Upload Data"
-        description="Import CSV / sensor data into LeakSense, or seed the database with synthetic campus data."
-      />
+      <SectionTitle icon={Upload}>Upload Data</SectionTitle>
+      <p className="-mt-4 text-sm text-muted-foreground">
+        Import CSV / sensor data into LeakSense, or seed the database with synthetic campus data.
+      </p>
       <div className="rounded-lg border border-border bg-card p-6">
         <div className="flex items-start gap-4">
           <div className="rounded-md bg-primary/10 p-3 text-primary">
