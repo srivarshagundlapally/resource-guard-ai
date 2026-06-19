@@ -1,6 +1,8 @@
 import { useRouterState } from "@tanstack/react-router";
+import { useIsFetching } from "@tanstack/react-query";
 import { Bell, RefreshCw, Settings } from "lucide-react";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 const TITLES: Record<string, string> = {
   "/dashboard": "Live Dashboard",
@@ -14,6 +16,7 @@ const TITLES: Record<string, string> = {
 export function Header() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const title = TITLES[pathname] ?? "LeakSense AI";
+  const isFetching = useIsFetching();
   const date = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "short",
@@ -30,8 +33,14 @@ export function Header() {
         <p className="text-[11px] text-slate-500">{date}</p>
       </div>
       <div className="flex items-center gap-2">
+        {isFetching > 0 && (
+          <span className="mr-1 inline-flex items-center gap-1.5 text-[11px] text-accent">
+            <RefreshCw className="h-3 w-3 animate-spin" />
+            Refreshing…
+          </span>
+        )}
         <IconBtn>
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className={cn("h-4 w-4", isFetching > 0 && "animate-spin text-accent")} />
         </IconBtn>
         <IconBtn>
           <Bell className="h-4 w-4" />
