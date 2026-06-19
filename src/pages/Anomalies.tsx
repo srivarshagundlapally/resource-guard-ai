@@ -252,7 +252,9 @@ export function Anomalies() {
   const qc = useQueryClient();
 
   const setSearch = (patch: Partial<typeof search>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch, page: patch.page ?? 1 }) });
+    navigate({
+      search: (prev: typeof search) => ({ ...prev, ...patch, page: patch.page ?? 1 }),
+    });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -354,7 +356,7 @@ export function Anomalies() {
     ];
     const rows = anomalies.map((a) =>
       header.map((h) => {
-        const v = (a as Record<string, unknown>)[h];
+        const v = (a as unknown as Record<string, unknown>)[h];
         const s = v == null ? "" : String(v);
         return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
       }).join(","),
