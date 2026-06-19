@@ -19,12 +19,21 @@ export function useConsumption(resource: ResourceType, building_id?: string) {
     queryKey: ["consumption", resource, building_id],
     queryFn: async () => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      let q = supabase.from(table).select(`timestamp, ${col}, building_id`).gte("timestamp", since);
-      if (building_id) q = q.eq("building_id", building_id);
-      const { data, error } = await q;
+      // Supabase generated types don't yet include these tables — cast through any.
+      const client = supabase as unknown as {
+        from: (t: string) => {
+          select: (cols: string) => {
+            gte: (col: string, v: string) => {
+              eq: (col: string, v: string) => Promise<{ data: unknown; error: { message: string } | null }>;
+            } & Promise<{ data: unknown; error: { message: string } | null }>;
+          };
+        };
+      };
+      const base = client.from(table).select(`timestamp, ${col}, building_id`).gte("timestamp", since);
+      const { data, error } = building_id ? await base.eq("building_id", building_id) : await base;
       if (error) throw error;
       const buckets = new Map<string, number>();
-      for (const row of (data ?? []) as Array<Record<string, unknown>>) {
+      for (const row of ((data ?? []) as unknown as Array<Record<string, unknown>>)) {
         const ts = new Date(row.timestamp as string);
         ts.setMinutes(0, 0, 0);
         const key = ts.toISOString();
