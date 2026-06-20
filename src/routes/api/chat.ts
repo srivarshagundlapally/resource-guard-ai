@@ -43,7 +43,14 @@ export const Route = createFileRoute("/api/chat")({
           messages: await convertToModelMessages(messages),
         });
 
-        return result.toUIMessageStreamResponse({ originalMessages: messages });
+        return result.toUIMessageStreamResponse({
+          originalMessages: messages,
+          onError: (error) => {
+            console.error("[/api/chat] stream error", error);
+            const msg = error instanceof Error ? error.message : String(error);
+            return msg || "Stream failed";
+          },
+        });
       },
     },
   },
