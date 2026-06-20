@@ -37,13 +37,7 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(key);
         const model = gateway("google/gemini-3-flash-preview");
 
-        let modelMessages;
-        try {
-          modelMessages = convertToModelMessages(messages);
-        } catch (e) {
-          console.error("[/api/chat] convertToModelMessages failed", e);
-          return new Response("Invalid messages", { status: 400 });
-        }
+        const modelMessages = await convertToModelMessages(messages);
         const result = streamText({
           model,
           system: SYSTEM_PROMPT + "\n\nCONTEXT DATA:\n" + (context ?? "(no context provided)"),
