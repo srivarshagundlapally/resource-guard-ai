@@ -46,13 +46,14 @@ export async function buildRAGContext(query: string): Promise<string> {
   const todayIso = today.toISOString();
 
   const fetchTotal = async (table: "water_consumption" | "electricity_consumption" | "internet_consumption", col: string) => {
-    const { data } = await supabase
-      .from(table)
+    const { data } = await (supabase.from(table) as unknown as {
+      select: (s: string) => { gte: (c: string, v: string) => Promise<{ data: Array<Record<string, unknown>> | null }> };
+    })
       .select(`${col}, building_id`)
       .gte("timestamp", todayIso);
     if (!data?.length) return null;
     const totals: Record<string, number> = {};
-    for (const row of data as Array<Record<string, unknown>>) {
+    for (const row of data) {
       const b = String(row.building_id);
       totals[b] = (totals[b] ?? 0) + Number(row[col] ?? 0);
     }
