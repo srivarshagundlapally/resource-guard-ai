@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/chat")({
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
         const gateway = createLovableAiGatewayProvider(key);
-        const model = gateway("anthropic/claude-sonnet-4-5");
+        const model = gateway("google/gemini-3-flash-preview");
 
         const result = streamText({
           model,

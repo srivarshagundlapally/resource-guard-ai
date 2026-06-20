@@ -191,7 +191,7 @@ export default function Chatbot() {
               LeakSense AI Assistant
             </h1>
             <p className="text-xs text-muted-foreground">
-              Powered by Anthropic Claude + RAG
+              Powered by Lovable AI + RAG
             </p>
           </div>
         </div>
