@@ -112,7 +112,7 @@ async function generateReport(reportType: ReportType, resourceType: ResourceType
     resource_type: resourceType,
     period_start: since.toISOString(),
     period_end: now.toISOString(),
-    content,
+    content: content as never,
   });
   if (insertErr) throw insertErr;
 }
