@@ -240,6 +240,40 @@ export function Dashboard() {
         <SectionTitle>Consumption Heatmap (Last 7 Days)</SectionTitle>
         {loading ? <Skeleton className="h-[220px]" /> : <Heatmap cells={data.heatmap} max={data.heatmapMax} buildings={[...BUILDINGS]} />}
       </div>
+
+      {/* About / Team */}
+      <div className="rounded-xl border border-surface-border bg-card p-5">
+        <SectionTitle>About this Project</SectionTitle>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-sm text-slate-300">
+              <span className="font-semibold text-slate-100">LeakSense AI</span>{" "}
+              — Intelligent Resource Leakage Detection System for GCET Campus.
+              Real-time monitoring, anomaly detection, ML forecasting, and AI
+              recommendations for water, electricity, and internet.
+            </p>
+            <p className="mt-2 text-[11px] text-slate-500">
+              III B.Tech II Sem AIML · AY 2026–27 · v1.0.0
+            </p>
+          </div>
+          <div className="rounded-lg border border-surface-border bg-surface/40 p-3">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-accent">
+              Team B5
+            </div>
+            <ul className="mt-2 space-y-1 text-xs text-slate-300">
+              <li>• Ch. Rishitha</li>
+              <li>• G. Sri Varsha</li>
+              <li>• A. Sameera</li>
+            </ul>
+            <div className="mt-3 border-t border-surface-border pt-2 text-[11px] text-slate-400">
+              Guide:{" "}
+              <span className="font-medium text-slate-200">
+                Ch. Nageswara Rao
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
