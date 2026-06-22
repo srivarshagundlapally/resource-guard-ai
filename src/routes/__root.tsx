@@ -96,6 +96,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "LeakSense AI — Resource Monitor" },
+      { name: "description", content: "LeakSense AI is a resource leakage detection system for a college campus." },
+      { property: "og:description", content: "LeakSense AI is a resource leakage detection system for a college campus." },
+      { name: "twitter:description", content: "LeakSense AI is a resource leakage detection system for a college campus." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7e9d7dbc-a214-4c85-9bdd-237ab9c4fe7f/id-preview-2577d82b--d3f61167-9a50-40f9-b571-1040550c73d8.lovable.app-1782104446084.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7e9d7dbc-a214-4c85-9bdd-237ab9c4fe7f/id-preview-2577d82b--d3f61167-9a50-40f9-b571-1040550c73d8.lovable.app-1782104446084.png" },
     ],
     links: [
       {
