@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Toaster } from "react-hot-toast";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 function NotFoundComponent() {
   return (
@@ -77,11 +79,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "LeakSense AI — Resource Monitor" },
+      {
+        name: "description",
+        content:
+          "Intelligent Resource Leakage Detection System for GCET Campus",
+      },
+      { name: "theme-color", content: "#0D1B2A" },
+      { name: "author", content: "Team B5 · GCET" },
+      { property: "og:title", content: "LeakSense AI — Resource Monitor" },
+      {
+        property: "og:description",
+        content:
+          "Intelligent Resource Leakage Detection System for GCET Campus",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -124,8 +135,22 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <ErrorBoundary>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </ErrorBoundary>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#162032",
+            color: "#E2E8F0",
+            border: "1px solid #1E2F45",
+          },
+          success: { iconTheme: { primary: "#00C9A7", secondary: "#162032" } },
+          error: { iconTheme: { primary: "#E74C3C", secondary: "#162032" } },
+        }}
+      />
     </QueryClientProvider>
   );
 }

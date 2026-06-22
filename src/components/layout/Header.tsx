@@ -1,6 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useIsFetching } from "@tanstack/react-query";
-import { Bell, RefreshCw, Settings } from "lucide-react";
+import { Bell, Menu, RefreshCw, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ const TITLES: Record<string, string> = {
   "/upload": "Upload Data",
 };
 
-export function Header() {
+export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const title = TITLES[pathname] ?? "LeakSense AI";
   const isFetching = useIsFetching();
@@ -26,11 +26,21 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-surface-border bg-card px-6">
-      <div>
-        <h1 className="font-display text-base font-bold leading-tight text-slate-100">
-          {title}
-        </h1>
-        <p className="text-[11px] text-slate-500">{date}</p>
+      <div className="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-surface-border bg-surface/50 text-slate-300 hover:bg-surface-border md:hidden"
+          aria-label="Open menu"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+        <div className="min-w-0">
+          <h1 className="truncate font-display text-base font-bold leading-tight text-slate-100">
+            {title}
+          </h1>
+          <p className="truncate text-[11px] text-slate-500">{date}</p>
+        </div>
       </div>
       <div className="flex items-center gap-2">
         {isFetching > 0 && (

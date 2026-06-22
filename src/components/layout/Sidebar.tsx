@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Upload,
   Wifi,
+  X,
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,11 +23,38 @@ const NAV = [
   { to: "/upload", label: "Upload Data", icon: Upload },
 ] as const;
 
-export function Sidebar() {
+export function Sidebar({
+  mobileOpen = false,
+  onClose,
+}: {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-surface-border bg-card md:flex">
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-surface-border bg-card transition-transform duration-200 md:translate-x-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        )}
+      >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-surface-border hover:text-slate-100 md:hidden"
+        aria-label="Close menu"
+      >
+        <X className="h-4 w-4" />
+      </button>
       <div className="px-5 pb-4 pt-5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/30">
@@ -91,7 +119,11 @@ export function Sidebar() {
           <br />
           AY 2026–27
         </div>
+        <div className="mt-2 border-t border-surface-border pt-2 text-[10px] font-medium text-slate-500">
+          v1.0.0 · Team B5 GCET
+        </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
