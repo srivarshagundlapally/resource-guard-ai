@@ -24,7 +24,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { Route } from "@/routes/_app.anomalies";
+import { Route } from "@/routes/_authenticated.anomalies";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { SectionTitle } from "@/components/ui/SectionTitle";

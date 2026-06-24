@@ -141,9 +141,14 @@ export default function Chatbot() {
     // Ensure session
     let sid = sessionId;
     if (!sid) {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        toast.error("Please sign in to chat");
+        return;
+      }
       const { data, error: e } = await supabase
         .from("chat_sessions")
-        .insert({ user_id: "demo" })
+        .insert({ user_id: userData.user.id })
         .select("id")
         .single();
       if (e || !data) {

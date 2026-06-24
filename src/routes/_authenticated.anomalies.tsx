@@ -11,7 +11,7 @@ const searchSchema = z.object({
   page: fallback(z.number().int().min(1), 1).default(1),
 });
 
-export const Route = createFileRoute("/_app/anomalies")({
+export const Route = createFileRoute("/_authenticated/anomalies")({
   head: () => ({ meta: [{ title: "Anomalies — LeakSense AI" }] }),
   validateSearch: zodValidator(searchSchema),
   component: Anomalies,
