@@ -9,18 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AppRouteImport } from './routes/_app'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AppUploadRouteImport } from './routes/_app.upload'
-import { Route as AppReportsRouteImport } from './routes/_app.reports'
-import { Route as AppPredictionsRouteImport } from './routes/_app.predictions'
-import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
-import { Route as AppChatbotRouteImport } from './routes/_app.chatbot'
-import { Route as AppAnomaliesRouteImport } from './routes/_app.anomalies'
+import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated.upload'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated.reports'
+import { Route as AuthenticatedPredictionsRouteImport } from './routes/_authenticated.predictions'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedChatbotRouteImport } from './routes/_authenticated.chatbot'
+import { Route as AuthenticatedAnomaliesRouteImport } from './routes/_authenticated.anomalies'
 
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -33,67 +33,68 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppUploadRoute = AppUploadRouteImport.update({
+const AuthenticatedUploadRoute = AuthenticatedUploadRouteImport.update({
   id: '/upload',
   path: '/upload',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AppReportsRoute = AppReportsRouteImport.update({
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AppPredictionsRoute = AppPredictionsRouteImport.update({
-  id: '/predictions',
-  path: '/predictions',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
+const AuthenticatedPredictionsRoute =
+  AuthenticatedPredictionsRouteImport.update({
+    id: '/predictions',
+    path: '/predictions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AppChatbotRoute = AppChatbotRouteImport.update({
+const AuthenticatedChatbotRoute = AuthenticatedChatbotRouteImport.update({
   id: '/chatbot',
   path: '/chatbot',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AppAnomaliesRoute = AppAnomaliesRouteImport.update({
+const AuthenticatedAnomaliesRoute = AuthenticatedAnomaliesRouteImport.update({
   id: '/anomalies',
   path: '/anomalies',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/anomalies': typeof AppAnomaliesRoute
-  '/chatbot': typeof AppChatbotRoute
-  '/dashboard': typeof AppDashboardRoute
-  '/predictions': typeof AppPredictionsRoute
-  '/reports': typeof AppReportsRoute
-  '/upload': typeof AppUploadRoute
+  '/anomalies': typeof AuthenticatedAnomaliesRoute
+  '/chatbot': typeof AuthenticatedChatbotRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/predictions': typeof AuthenticatedPredictionsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/upload': typeof AuthenticatedUploadRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/anomalies': typeof AppAnomaliesRoute
-  '/chatbot': typeof AppChatbotRoute
-  '/dashboard': typeof AppDashboardRoute
-  '/predictions': typeof AppPredictionsRoute
-  '/reports': typeof AppReportsRoute
-  '/upload': typeof AppUploadRoute
+  '/anomalies': typeof AuthenticatedAnomaliesRoute
+  '/chatbot': typeof AuthenticatedChatbotRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/predictions': typeof AuthenticatedPredictionsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/upload': typeof AuthenticatedUploadRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_app': typeof AppRouteWithChildren
-  '/_app/anomalies': typeof AppAnomaliesRoute
-  '/_app/chatbot': typeof AppChatbotRoute
-  '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/predictions': typeof AppPredictionsRoute
-  '/_app/reports': typeof AppReportsRoute
-  '/_app/upload': typeof AppUploadRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_authenticated/anomalies': typeof AuthenticatedAnomaliesRoute
+  '/_authenticated/chatbot': typeof AuthenticatedChatbotRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/predictions': typeof AuthenticatedPredictionsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
@@ -120,29 +121,29 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_app'
-    | '/_app/anomalies'
-    | '/_app/chatbot'
-    | '/_app/dashboard'
-    | '/_app/predictions'
-    | '/_app/reports'
-    | '/_app/upload'
+    | '/_authenticated'
+    | '/_authenticated/anomalies'
+    | '/_authenticated/chatbot'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/predictions'
+    | '/_authenticated/reports'
+    | '/_authenticated/upload'
     | '/api/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_app': {
-      id: '/_app'
+    '/_authenticated': {
+      id: '/_authenticated'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -159,74 +160,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/upload': {
-      id: '/_app/upload'
+    '/_authenticated/upload': {
+      id: '/_authenticated/upload'
       path: '/upload'
       fullPath: '/upload'
-      preLoaderRoute: typeof AppUploadRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedUploadRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/_app/reports': {
-      id: '/_app/reports'
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
       path: '/reports'
       fullPath: '/reports'
-      preLoaderRoute: typeof AppReportsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/_app/predictions': {
-      id: '/_app/predictions'
+    '/_authenticated/predictions': {
+      id: '/_authenticated/predictions'
       path: '/predictions'
       fullPath: '/predictions'
-      preLoaderRoute: typeof AppPredictionsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedPredictionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/_app/dashboard': {
-      id: '/_app/dashboard'
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/_app/chatbot': {
-      id: '/_app/chatbot'
+    '/_authenticated/chatbot': {
+      id: '/_authenticated/chatbot'
       path: '/chatbot'
       fullPath: '/chatbot'
-      preLoaderRoute: typeof AppChatbotRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedChatbotRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/_app/anomalies': {
-      id: '/_app/anomalies'
+    '/_authenticated/anomalies': {
+      id: '/_authenticated/anomalies'
       path: '/anomalies'
       fullPath: '/anomalies'
-      preLoaderRoute: typeof AppAnomaliesRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAnomaliesRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
-interface AppRouteChildren {
-  AppAnomaliesRoute: typeof AppAnomaliesRoute
-  AppChatbotRoute: typeof AppChatbotRoute
-  AppDashboardRoute: typeof AppDashboardRoute
-  AppPredictionsRoute: typeof AppPredictionsRoute
-  AppReportsRoute: typeof AppReportsRoute
-  AppUploadRoute: typeof AppUploadRoute
+interface AuthenticatedRouteChildren {
+  AuthenticatedAnomaliesRoute: typeof AuthenticatedAnomaliesRoute
+  AuthenticatedChatbotRoute: typeof AuthenticatedChatbotRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedPredictionsRoute: typeof AuthenticatedPredictionsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
 }
 
-const AppRouteChildren: AppRouteChildren = {
-  AppAnomaliesRoute: AppAnomaliesRoute,
-  AppChatbotRoute: AppChatbotRoute,
-  AppDashboardRoute: AppDashboardRoute,
-  AppPredictionsRoute: AppPredictionsRoute,
-  AppReportsRoute: AppReportsRoute,
-  AppUploadRoute: AppUploadRoute,
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAnomaliesRoute: AuthenticatedAnomaliesRoute,
+  AuthenticatedChatbotRoute: AuthenticatedChatbotRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedPredictionsRoute: AuthenticatedPredictionsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedUploadRoute: AuthenticatedUploadRoute,
 }
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRouteWithChildren,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
