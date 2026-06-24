@@ -1,8 +1,9 @@
-import { useRouterState } from "@tanstack/react-router";
+import { useRouterState, useNavigate } from "@tanstack/react-router";
 import { useIsFetching } from "@tanstack/react-query";
-import { Bell, Menu, RefreshCw, Settings } from "lucide-react";
+import { Bell, LogOut, Menu, RefreshCw, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const TITLES: Record<string, string> = {
   "/dashboard": "Live Dashboard",
@@ -15,6 +16,7 @@ const TITLES: Record<string, string> = {
 
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const title = TITLES[pathname] ?? "LeakSense AI";
   const isFetching = useIsFetching();
   const date = new Date().toLocaleDateString("en-US", {
@@ -59,6 +61,17 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <IconBtn>
           <Settings className="h-4 w-4" />
         </IconBtn>
+        <button
+          type="button"
+          onClick={async () => {
+            await supabase.auth.signOut();
+            navigate({ to: "/auth", replace: true });
+          }}
+          className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-surface-border bg-surface/50 text-slate-300 transition-colors duration-150 hover:bg-surface-border hover:text-slate-100"
+          aria-label="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
         <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-[11px] font-bold text-white">
           B5
         </div>
