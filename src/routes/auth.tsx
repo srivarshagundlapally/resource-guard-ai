@@ -11,11 +11,19 @@ import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   component: AuthPage,
 });
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect: redirectTo } = Route.useSearch();
+  const safeRedirect =
+    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+      ? redirectTo
+      : "/dashboard";
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,9 +31,9 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/dashboard", replace: true });
+      if (data.user) navigate({ to: safeRedirect, replace: true });
     });
-  }, [navigate]);
+  }, [navigate, safeRedirect]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +51,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      navigate({ to: "/dashboard", replace: true });
+      navigate({ to: safeRedirect, replace: true });
     } catch (err: any) {
       toast.error(err?.message ?? "Authentication failed");
     } finally {
@@ -55,14 +63,16 @@ function AuthPage() {
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth${
+          redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""
+        }`,
       });
       if (result.error) {
         toast.error(result.error.message ?? "Google sign-in failed");
         return;
       }
       if (result.redirected) return;
-      navigate({ to: "/dashboard", replace: true });
+      navigate({ to: safeRedirect, replace: true });
     } finally {
       setLoading(false);
     }
