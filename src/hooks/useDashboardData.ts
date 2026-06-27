@@ -71,7 +71,30 @@ export function useDashboardData() {
     queryKey: ["dashboard-data"],
     refetchInterval: 30_000,
     queryFn: async () => {
-      const now = new Date();
+      // Anchor "now" to the latest timestamp present across the consumption
+      // tables so the dashboard always reflects real data, even when the
+      // seeded dataset isn't aligned with the wall clock.
+      const latestTs = await (async () => {
+        const tables = [
+          ["water_consumption"],
+          ["electricity_consumption"],
+          ["internet_consumption"],
+        ] as const;
+        const results = await Promise.all(
+          tables.map(async ([t]) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data } = await (supabase.from(t as any) as any)
+              .select("timestamp")
+              .order("timestamp", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            return data?.timestamp ? new Date(data.timestamp).getTime() : 0;
+          }),
+        );
+        const max = Math.max(...results, 0);
+        return max ? new Date(max) : new Date();
+      })();
+      const now = latestTs;
       const todayStart = startOfDay(now);
       const yesterdayStart = new Date(todayStart.getTime() - 24 * 3600 * 1000);
       const last24Start = new Date(now.getTime() - 24 * 3600 * 1000);
