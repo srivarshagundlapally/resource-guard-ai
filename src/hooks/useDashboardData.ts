@@ -98,7 +98,7 @@ export function useDashboardData() {
       const todayStart = startOfDay(now);
       const yesterdayStart = new Date(todayStart.getTime() - 24 * 3600 * 1000);
       const last24Start = new Date(now.getTime() - 24 * 3600 * 1000);
-      const sevenDayStart = startOfDay(new Date(now.getTime() - 29 * 24 * 3600 * 1000));
+      const sevenDayStart = startOfDay(new Date(now.getTime() - 6 * 24 * 3600 * 1000));
       const earliest = new Date(
         Math.min(yesterdayStart.getTime(), last24Start.getTime(), sevenDayStart.getTime()),
       ).toISOString();
