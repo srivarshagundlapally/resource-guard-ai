@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
     if (data.user) {
       throw redirect({ to: "/dashboard" });
     } else {
-      throw redirect({ to: "/auth" });
+      throw redirect({ to: "/auth", search: { redirect: undefined } });
     }
   },
 });
