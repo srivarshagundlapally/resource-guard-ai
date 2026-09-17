@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const SYSTEM_PROMPT = `You are LeakSense AI Assistant, an intelligent resource monitoring expert for Geethanjali College of Engineering & Technology campus (GCET).
@@ -32,7 +32,24 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Messages are required", { status: 400 });
         }
         const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        if (!key) {
+          // Graceful fallback: answer without the AI gateway so the UI never
+          // shows a configuration error banner.
+          const fallback =
+            "I'm running in offline mode right now because the AI service isn't configured on this deployment. " +
+            "Your question was received, but I can't generate a live answer. " +
+            "Please try again shortly, or check the Dashboard, Anomalies, and Reports pages for the underlying data.";
+          const stream = createUIMessageStream({
+            execute: ({ writer }) => {
+              writer.write({ type: "start" });
+              writer.write({ type: "text-start", id: "offline-1" });
+              writer.write({ type: "text-delta", id: "offline-1", delta: fallback });
+              writer.write({ type: "text-end", id: "offline-1" });
+              writer.write({ type: "finish" });
+            },
+          });
+          return createUIMessageStreamResponse({ stream });
+        }
 
         const gateway = createLovableAiGatewayProvider(key);
         const model = gateway("google/gemini-3-flash-preview");
