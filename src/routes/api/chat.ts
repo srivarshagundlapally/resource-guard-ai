@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const SYSTEM_PROMPT = `You are LeakSense AI Assistant, an intelligent resource monitoring expert for Geethanjali College of Engineering & Technology campus (GCET).
@@ -39,22 +39,16 @@ export const Route = createFileRoute("/api/chat")({
             "I'm running in offline mode right now because the AI service isn't configured on this deployment. " +
             "Your question was received, but I can't generate a live answer. " +
             "Please try again shortly, or check the Dashboard, Anomalies, and Reports pages for the underlying data.";
-          const encoder = new TextEncoder();
-          const stream = new ReadableStream<Uint8Array>({
-            start(controller) {
-              controller.enqueue(
-                encoder.encode(
-                  `data: ${JSON.stringify({ type: "text-delta", id: "offline-1", delta: fallback })}\n\n`,
-                ),
-              );
-              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-              controller.close();
+          const stream = createUIMessageStream({
+            execute: ({ writer }) => {
+              writer.write({ type: "start" });
+              writer.write({ type: "text-start", id: "offline-1" });
+              writer.write({ type: "text-delta", id: "offline-1", delta: fallback });
+              writer.write({ type: "text-end", id: "offline-1" });
+              writer.write({ type: "finish" });
             },
           });
-          return new Response(stream, {
-            status: 200,
-            headers: { "content-type": "text/event-stream; charset=utf-8" },
-          });
+          return createUIMessageStreamResponse({ stream });
         }
 
         const gateway = createLovableAiGatewayProvider(key);
