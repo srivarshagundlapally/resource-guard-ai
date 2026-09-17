@@ -32,7 +32,30 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Messages are required", { status: 400 });
         }
         const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        if (!key) {
+          // Graceful fallback: answer without the AI gateway so the UI never
+          // shows a configuration error banner.
+          const fallback =
+            "I'm running in offline mode right now because the AI service isn't configured on this deployment. " +
+            "Your question was received, but I can't generate a live answer. " +
+            "Please try again shortly, or check the Dashboard, Anomalies, and Reports pages for the underlying data.";
+          const encoder = new TextEncoder();
+          const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "text-delta", id: "offline-1", delta: fallback })}\n\n`,
+                ),
+              );
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            },
+          });
+          return new Response(stream, {
+            status: 200,
+            headers: { "content-type": "text/event-stream; charset=utf-8" },
+          });
+        }
 
         const gateway = createLovableAiGatewayProvider(key);
         const model = gateway("google/gemini-3-flash-preview");
