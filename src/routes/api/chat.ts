@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const SYSTEM_PROMPT = `You are LeakSense AI Assistant, an intelligent resource monitoring expert for Geethanjali College of Engineering & Technology campus (GCET).
@@ -21,34 +21,46 @@ Response guidelines:
 - Keep responses focused and actionable. Use bullet points for lists.
 - When asked about ML models, explain that XGBoost was selected as best model based on lowest RMSE on the 20% time-series test set`;
 
+const ALLOWED_ORIGINS = [
+  "https://resource-guard-ai.vercel.app",
+  "https://resource-guard-ai.lovable.app",
+];
+
+function cors(request: Request): Record<string, string> {
+  const origin = request.headers.get("origin") ?? "";
+  return {
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    Vary: "Origin",
+  };
+}
+
 type ChatBody = { messages?: UIMessage[]; context?: string };
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
+      OPTIONS: async ({ request }) => new Response(null, { status: 204, headers: cors(request) }),
       POST: async ({ request }) => {
-        const { messages, context } = (await request.json()) as ChatBody;
-        if (!Array.isArray(messages)) {
-          return new Response("Messages are required", { status: 400 });
+        let body: ChatBody;
+        try {
+          body = (await request.json()) as ChatBody;
+        } catch {
+          return new Response("Invalid JSON body", { status: 400, headers: cors(request) });
         }
-        const key = process.env.LOVABLE_API_KEY;
+        const { messages, context } = body;
+        if (!Array.isArray(messages)) {
+          return new Response("Messages are required", { status: 400, headers: cors(request) });
+        }
+        const key =
+          process.env["LOVABLE_API_KEY"] || process.env["AI_GATEWAY_API_KEY"];
         if (!key) {
-          // Graceful fallback: answer without the AI gateway so the UI never
-          // shows a configuration error banner.
-          const fallback =
-            "I'm running in offline mode right now because the AI service isn't configured on this deployment. " +
-            "Your question was received, but I can't generate a live answer. " +
-            "Please try again shortly, or check the Dashboard, Anomalies, and Reports pages for the underlying data.";
-          const stream = createUIMessageStream({
-            execute: ({ writer }) => {
-              writer.write({ type: "start" });
-              writer.write({ type: "text-start", id: "offline-1" });
-              writer.write({ type: "text-delta", id: "offline-1", delta: fallback });
-              writer.write({ type: "text-end", id: "offline-1" });
-              writer.write({ type: "finish" });
-            },
-          });
-          return createUIMessageStreamResponse({ stream });
+          console.error("[/api/chat] LOVABLE_API_KEY is not set in this deployment's environment");
+          return new Response(
+            "AI service not configured: LOVABLE_API_KEY is missing from the server environment variables. Add it in your hosting settings and redeploy.",
+            { status: 503, headers: { ...cors(request), "Content-Type": "text/plain" } },
+          );
         }
 
         const gateway = createLovableAiGatewayProvider(key);
@@ -65,6 +77,7 @@ export const Route = createFileRoute("/api/chat")({
         });
 
         return result.toUIMessageStreamResponse({
+          headers: cors(request),
           originalMessages: messages,
           onError: (error) => {
             console.error("[/api/chat] stream error", error);
