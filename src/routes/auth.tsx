@@ -28,16 +28,42 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Surface OAuth callback errors (?error=...&error_description=... or in the #hash)
+    const q = new URLSearchParams(window.location.search);
+    const h = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const err = q.get("error_description") || h.get("error_description") || q.get("error") || h.get("error");
+    if (err) {
+      const msg = decodeURIComponent(err.replace(/\+/g, " "));
+      console.error("[auth] OAuth callback error:", msg);
+      setAuthError(msg);
+    }
+    // PKCE code exchange when returning from a direct OAuth redirect
+    const code = q.get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          console.error("[auth] code exchange failed", error);
+          setAuthError(error.message);
+        } else navigate({ to: safeRedirect, replace: true });
+      });
+      return;
+    }
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session) navigate({ to: safeRedirect, replace: true });
+    });
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: safeRedirect, replace: true });
     });
+    return () => sub.subscription.unsubscribe();
   }, [navigate, safeRedirect]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthError(null);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
@@ -53,6 +79,8 @@ function AuthPage() {
       }
       navigate({ to: safeRedirect, replace: true });
     } catch (err: any) {
+      console.error("[auth]", err);
+      setAuthError(err?.message ?? "Authentication failed");
       toast.error(err?.message ?? "Authentication failed");
     } finally {
       setLoading(false);
@@ -61,18 +89,31 @@ function AuthPage() {
 
   const google = async () => {
     setLoading(true);
+    setAuthError(null);
+    const callback = `${window.location.origin}/auth${
+      redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""
+    }`;
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth${
-          redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""
-        }`,
-      });
-      if (result.error) {
-        toast.error(result.error.message ?? "Google sign-in failed");
-        return;
+      const host = window.location.hostname;
+      const lovableHosted = host.endsWith(".lovable.app") || host.endsWith(".lovableproject.com");
+      if (lovableHosted) {
+        const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: callback });
+        if (result.error) throw result.error;
+        if (result.redirected) return;
+        navigate({ to: safeRedirect, replace: true });
+      } else {
+        // Self-hosted (e.g. Vercel): standard OAuth redirect back to this origin
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo: callback },
+        });
+        if (error) throw error;
       }
-      if (result.redirected) return;
-      navigate({ to: safeRedirect, replace: true });
+    } catch (err: any) {
+      console.error("[auth] Google sign-in failed", err);
+      const msg = err?.message ?? "Google sign-in failed";
+      setAuthError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -93,6 +134,11 @@ function AuthPage() {
           </p>
         </div>
 
+        {authError && (
+          <div role="alert" className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive">
+            {authError}
+          </div>
+        )}
         <Button
           type="button"
           variant="outline"
