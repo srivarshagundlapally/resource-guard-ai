@@ -90,7 +90,6 @@ function AuthPage() {
   const google = async () => {
     setLoading(true);
     setAuthError(null);
-    if (redirectTo) sessionStorage.setItem("postAuthRedirect", safeRedirect);
     const callback = `${window.location.origin}/auth${
       redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : ""
     }`;
