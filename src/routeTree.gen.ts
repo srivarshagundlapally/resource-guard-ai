@@ -19,6 +19,7 @@ import { Route as AuthenticatedPredictionsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedChatbotRouteImport } from './routes/_authenticated.chatbot'
 import { Route as AuthenticatedAnomaliesRouteImport } from './routes/_authenticated.anomalies'
+import { Route as ApiDatabricksSplatRouteImport } from './routes/api/databricks.$'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -70,6 +71,11 @@ const AuthenticatedAnomaliesRoute = AuthenticatedAnomaliesRouteImport.update({
   path: '/anomalies',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiDatabricksSplatRoute = ApiDatabricksSplatRouteImport.update({
+  id: '/api/databricks/$',
+  path: '/api/databricks/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/databricks/$': typeof ApiDatabricksSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/databricks/$': typeof ApiDatabricksSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/databricks/$': typeof ApiDatabricksSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/upload'
     | '/api/chat'
+    | '/api/databricks/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/upload'
     | '/api/chat'
+    | '/api/databricks/$'
   id:
     | '__root__'
     | '/'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/upload'
     | '/api/chat'
+    | '/api/databricks/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -148,6 +160,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiDatabricksSplatRoute: typeof ApiDatabricksSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -222,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnomaliesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/databricks/$': {
+      id: '/api/databricks/$'
+      path: '/api/databricks/$'
+      fullPath: '/api/databricks/$'
+      preLoaderRoute: typeof ApiDatabricksSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -252,6 +272,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiDatabricksSplatRoute: ApiDatabricksSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
