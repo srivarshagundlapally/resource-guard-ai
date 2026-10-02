@@ -44,15 +44,15 @@ async function handle({ request, params }: { request: Request; params: { _splat?
 
   const search = new URL(request.url).search;
   let target: string;
-  let headers: Record<string, string>;
+  let reqHeaders: Record<string, string>;
   if (host) {
     const h = /^https?:\/\//.test(host) ? host : `https://${host}`;
     target = `${h.replace(/\/$/, "")}/api/${normalized}${search}`;
-    headers = { Authorization: `Bearer ${dbToken}`, "Content-Type": "application/json" };
+    reqHeaders = { Authorization: `Bearer ${dbToken}`, "Content-Type": "application/json" };
   } else {
     const base = process.env.CONNECTOR_GATEWAY_BASE_URL ?? "https://connector-gateway.lovable.dev";
     target = `${base.replace(/\/$/, "")}/databricks/${normalized}${search}`;
-    headers = {
+    reqHeaders = {
       Authorization: `Bearer ${lovKey}`,
       "X-Connection-Api-Key": dbToken!,
       "Content-Type": "application/json",
