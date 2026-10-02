@@ -18,10 +18,12 @@ async function handle({ request, params }: { request: Request; params: { _splat?
   const { data: userData, error: userErr } = await sb.auth.getUser(token);
   if (userErr || !userData.user) return json({ error: "Unauthorized" }, 401);
 
-  const base = process.env.CONNECTOR_GATEWAY_BASE_URL ?? "https://connector-gateway.lovable.dev";
-  const dbKey = process.env.DATABRICKS_API_KEY;
+  const host = process.env.DATABRICKS_HOST;
+  const dbToken = process.env.DATABRICKS_TOKEN || process.env.DATABRICKS_API_KEY;
   const lovKey = process.env.LOVABLE_API_KEY;
-  if (!dbKey || !lovKey) return json({ error: "connector proxy is not configured" }, 503);
+  if (host ? !dbToken : !dbToken || !lovKey) {
+    return json({ error: "Databricks proxy is not configured" }, 503);
+  }
 
   const method = request.method.toUpperCase();
   let normalized = "";
@@ -41,14 +43,24 @@ async function handle({ request, params }: { request: Request; params: { _splat?
   }
 
   const search = new URL(request.url).search;
-  const target = `${base.replace(/\/$/, "")}/databricks/${normalized}${search}`;
+  let target: string;
+  let reqHeaders: Record<string, string>;
+  if (host) {
+    const h = /^https?:\/\//.test(host) ? host : `https://${host}`;
+    target = `${h.replace(/\/$/, "")}/api/${normalized}${search}`;
+    reqHeaders = { Authorization: `Bearer ${dbToken}`, "Content-Type": "application/json" };
+  } else {
+    const base = process.env.CONNECTOR_GATEWAY_BASE_URL ?? "https://connector-gateway.lovable.dev";
+    target = `${base.replace(/\/$/, "")}/databricks/${normalized}${search}`;
+    reqHeaders = {
+      Authorization: `Bearer ${lovKey}`,
+      "X-Connection-Api-Key": dbToken!,
+      "Content-Type": "application/json",
+    };
+  }
   const upstream = await fetch(target, {
     method,
-    headers: {
-      Authorization: `Bearer ${lovKey}`,
-      "X-Connection-Api-Key": dbKey,
-      "Content-Type": "application/json",
-    },
+    headers: reqHeaders,
     body: method === "GET" ? undefined : await request.arrayBuffer(),
   });
   if (!upstream.ok) {

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveChatModel } from "@/lib/chat-provider.server";
 
 const SYSTEM_PROMPT = `You are LeakSense AI Assistant, an intelligent resource monitoring expert for Geethanjali College of Engineering & Technology campus (GCET).
 
@@ -53,18 +53,15 @@ export const Route = createFileRoute("/api/chat")({
         if (!Array.isArray(messages)) {
           return new Response("Messages are required", { status: 400, headers: cors(request) });
         }
-        const key =
-          process.env["LOVABLE_API_KEY"] || process.env["AI_GATEWAY_API_KEY"];
-        if (!key) {
-          console.error("[/api/chat] LOVABLE_API_KEY is not set in this deployment's environment");
+        const resolved = resolveChatModel();
+        if (!resolved) {
+          console.error("[/api/chat] No AI key configured (GEMINI_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, OPENAI_API_KEY or LOVABLE_API_KEY)");
           return new Response(
-            "AI service not configured: LOVABLE_API_KEY is missing from the server environment variables. Add it in your hosting settings and redeploy.",
+            "AI service not configured: set GEMINI_API_KEY (or GOOGLE_GENERATIVE_AI_API_KEY), OPENAI_API_KEY, or LOVABLE_API_KEY in your hosting environment variables and redeploy.",
             { status: 503, headers: { ...cors(request), "Content-Type": "text/plain" } },
           );
         }
-
-        const gateway = createLovableAiGatewayProvider(key);
-        const model = gateway("google/gemini-3-flash-preview");
+        const model = resolved.model;
 
         const modelMessages = await convertToModelMessages(messages);
         const result = streamText({
