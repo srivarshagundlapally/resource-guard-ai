@@ -60,7 +60,7 @@ async function handle({ request, params }: { request: Request; params: { _splat?
   }
   const upstream = await fetch(target, {
     method,
-    headers,
+    headers: reqHeaders,
     body: method === "GET" ? undefined : await request.arrayBuffer(),
   });
   if (!upstream.ok) {
