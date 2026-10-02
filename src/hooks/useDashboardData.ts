@@ -1,5 +1,70 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { runDatabricksSql, withFallback, DBX_TABLES } from "@/lib/databricks";
+
+const M = DBX_TABLES.metrics;
+const ANCHOR = `(SELECT max(timestamp) AS t FROM ${M})`;
+
+async function fetchFromDatabricks(): Promise<RpcPayload> {
+  type Row = Record<string, unknown>;
+  const [days, hourly, perB, heat] = await Promise.all([
+    runDatabricksSql<Row>(
+      `SELECT CAST(a.t AS STRING) AS now,
+        sum(CASE WHEN date(m.timestamp)=date(a.t) THEN water_usage_liters END) tw,
+        sum(CASE WHEN date(m.timestamp)=date(a.t) THEN electricity_usage_kwh END) te,
+        sum(CASE WHEN date(m.timestamp)=date(a.t) THEN internet_usage_gb END) ti,
+        sum(CASE WHEN date(m.timestamp)=date_sub(date(a.t),1) THEN water_usage_liters END) yw,
+        sum(CASE WHEN date(m.timestamp)=date_sub(date(a.t),1) THEN electricity_usage_kwh END) ye,
+        sum(CASE WHEN date(m.timestamp)=date_sub(date(a.t),1) THEN internet_usage_gb END) yi
+       FROM ${M} m CROSS JOIN ${ANCHOR} a
+       WHERE m.timestamp >= date_sub(date(a.t),1) GROUP BY a.t`,
+    ),
+    runDatabricksSql<Row>(
+      `SELECT CAST(date_trunc('HOUR', m.timestamp) AS STRING) hour, sum(water_usage_liters) water,
+        sum(electricity_usage_kwh) electricity, sum(internet_usage_gb) internet
+       FROM ${M} m CROSS JOIN ${ANCHOR} a
+       WHERE m.timestamp > a.t - INTERVAL 24 HOURS GROUP BY 1`,
+    ),
+    runDatabricksSql<Row>(
+      `SELECT building_id, sum(water_usage_liters) water, sum(electricity_usage_kwh) electricity,
+        sum(internet_usage_gb) internet
+       FROM ${M} m CROSS JOIN ${ANCHOR} a WHERE date(m.timestamp)=date(a.t) GROUP BY building_id`,
+    ),
+    runDatabricksSql<Row>(
+      `SELECT building_id, CAST(date(m.timestamp) AS STRING) date,
+        sum(coalesce(water_usage_liters,0)+coalesce(electricity_usage_kwh,0)+coalesce(internet_usage_gb,0)) value,
+        max(CASE WHEN anomaly_label IS NOT NULL AND lower(anomaly_label) NOT IN ('normal','none','') THEN 1 ELSE 0 END) has_anomaly
+       FROM ${M} m CROSS JOIN ${ANCHOR} a
+       WHERE m.timestamp >= date_sub(date(a.t),6) GROUP BY 1,2`,
+    ),
+  ]);
+  const d = days[0];
+  if (!d) throw new Error("No Databricks metrics");
+  const n = (v: unknown) => Number(v ?? 0);
+  return {
+    now: String(d.now).replace(" ", "T"),
+    today: { water: n(d.tw), electricity: n(d.te), internet: n(d.ti) },
+    yesterday: { water: n(d.yw), electricity: n(d.ye), internet: n(d.yi) },
+    hourly: hourly.map((r) => ({
+      hour: String(r.hour).replace(" ", "T"),
+      water: n(r.water),
+      electricity: n(r.electricity),
+      internet: n(r.internet),
+    })),
+    per_building: perB.map((r) => ({
+      building_id: String(r.building_id),
+      water: n(r.water),
+      electricity: n(r.electricity),
+      internet: n(r.internet),
+    })),
+    heatmap: heat.map((r) => ({
+      building_id: String(r.building_id),
+      date: `${r.date}T00:00:00`,
+      value: n(r.value),
+      has_anomaly: n(r.has_anomaly) > 0,
+    })),
+  };
+}
 
 export const RESOURCE_COLORS = {
   water: "#1B6CA8",
@@ -75,12 +140,13 @@ export function useDashboardData() {
     queryKey: ["dashboard-data"],
     refetchInterval: 30_000,
     queryFn: async () => {
-      // Aggregation happens in the database: the consumption tables hold
-      // hundreds of thousands of rows, far beyond a client-side page fetch.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)("get_dashboard_data");
-      if (error) throw error;
-      const p = (data ?? {}) as RpcPayload;
+      // Aggregation happens server-side: Databricks first, backend RPC as fallback.
+      const p = await withFallback<RpcPayload>(fetchFromDatabricks, async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase.rpc as any)("get_dashboard_data");
+        if (error) throw error;
+        return (data ?? {}) as RpcPayload;
+      });
       const now = p.now ? new Date(p.now) : new Date();
 
       const todayTotals = {
